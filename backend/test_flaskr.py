@@ -122,7 +122,36 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(len(data["questions"]), 0)
         self.assertEqual(data["total_questions"], 0)
 
+    #testcase 11: test questions_by_category() == success
+    def test_get_questions_by_category(self):
+        response = self.client().get("/categories/6/questions")
+        data = json.loads(response.data)
 
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(len(data["questions"]), 2)
+        self.assertEqual(data["current_category"],6)
+        self.assertTrue(data["total_questions"])
+
+    #testcase 12: additional test for questions_by_category() using non-existent category
+    def test_get_questions_by_category(self):
+        response = self.client().get("/categories/100/questions")
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(len(data["questions"]), 0)
+        self.assertEqual(data["current_category"],100)
+        self.assertEqual(data["total_questions"], 0)
+
+    #testcase 13: test questions_by_category() == failure
+    def test_404_wrong_url_get_questions_by_category(self):
+        response = self.client().get("/categories/6/qs")
+        data = json.loads(response.data)
+
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "resource not found")
+        self.assertEqual(data["error"], 404)
 
 
 # Make the tests conveniently executable
