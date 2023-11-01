@@ -160,7 +160,7 @@ def create_app(db_URI="", test_config=None):
         
 
     """
-    @TODO:
+    @TODO: == DONE
     Create an endpoint to POST a new question,
     which will require the question and answer text,
     category, and difficulty score.
@@ -171,7 +171,8 @@ def create_app(db_URI="", test_config=None):
 
     Personal Notes
     - Controller is FormView.js, method submitQuestion()
-    - curl test: curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{"question":"Is this a curl test?","answer":"yes it is","difficulty":3,"category":2}'  
+    - curl for new question: curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{"question":"Is this a curl test?","answer":"yes it is","difficulty":3,"category":2}'  
+    - curl for search question: curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{"searchTerm":"title"}' 
     """
     @app.route("/questions", methods=["POST"])
     def add_new_question():
@@ -185,31 +186,53 @@ def create_app(db_URI="", test_config=None):
             answer = new_question_body.get("answer", None)
             difficulty = new_question_body.get("difficulty", None)
             category = new_question_body.get("category", None)
+            search = new_question_body.get("searchTerm", None)
 
-            try:
-                #add to DB
-                question = Question(question=question, answer=answer, difficulty=difficulty, category=category)
-                question.insert()
+            if search:
+                # user submitted a search term
+                #search for search term
+                formatted_search_term = "%{}%".format(search)
+                selection = Question.query.order_by(Question.id).filter(Question.question.ilike(formatted_search_term))
+                category = "all"
+                #paginate the results
+                current_questions = paginate_questions(request, selection)
 
-                """ 
-                # paginate fresh fetch from DB and return page with list of questions
-                # no need to paginate as form resets for a new entry
-                selection = Question.query.order_by(Question.id).all()
-                current_questions = paginate_questions(request, selection) 
-                """
-
+                #return a jsonify
                 return jsonify(
                     {
                         "success": True,
-                        "created_question_id": question.id,
-                        "total_questions": len(Question.query.all())
+                        "questions": current_questions,
+                        "total_questions": len(selection.all()),
+                        "current_category": category
                     }
                 )
-            except:
-                abort(400)
+
+            else: 
+                # user submitted a new question
+                try:
+                    #add to DB
+                    question = Question(question=question, answer=answer, difficulty=difficulty, category=category)
+                    question.insert()
+
+                    """ 
+                    # paginate fresh fetch from DB and return page with list of questions
+                    # no need to paginate as form resets for a new entry
+                    selection = Question.query.order_by(Question.id).all()
+                    current_questions = paginate_questions(request, selection) 
+                    """
+
+                    return jsonify(
+                        {
+                            "success": True,
+                            "created_question_id": question.id,
+                            "total_questions": len(Question.query.all())
+                        }
+                    )
+                except:
+                    abort(400)
 
     """
-    @TODO:
+    @TODO: == DONE
     Create a POST endpoint to get questions based on a search term.
     It should return any questions for whom the search term
     is a substring of the question.
@@ -217,7 +240,13 @@ def create_app(db_URI="", test_config=None):
     TEST: Search by any phrase. The questions list will update to include
     only question that include that string within their question.
     Try using the word "title" to start.
+
+    Personal Notes
+    - Controller is QuestionView.js, method submitSearch()
+    - curl test: 
     """
+    # the TODO above has been implemented as part of the add_new_question() method
+
 
     """
     @TODO:

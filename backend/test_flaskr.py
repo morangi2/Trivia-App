@@ -66,7 +66,7 @@ class TriviaTestCase(unittest.TestCase):
         #question = Question.query.filter(Question.id == 12).one_or_none()
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data["success"], True), #change to False if running same test more than once
+        self.assertEqual(data["success"], True), 
         self.assertEqual(data["deleted_question"], 22),
         self.assertTrue(len(data["current_questions"])),
         self.assertTrue(data["total_questions"])
