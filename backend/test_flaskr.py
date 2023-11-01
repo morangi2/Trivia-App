@@ -49,12 +49,12 @@ class TriviaTestCase(unittest.TestCase):
     # testcase 4: test retrieve_categories() == failed ***check status code
     def test_404_for_bad_url(self):
         response = self.client().get("/categories/100000")
-        print(response.status_code)
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["error"], 404)
         self.assertEqual(data["success"], False)
-        self.assertEqual(len(data["categories"]), 0)
+        self.assertEqual(data["message"], "resource not found")
 
 
 

@@ -21,10 +21,14 @@ def paginate_questions(request, selection):
 def create_app(db_URI="", test_config=None):
     # create and configure the app
     app = Flask(__name__)
+    #database_path = 'postgresql://{}/{}'.format('localhost:5432', 'database_name')
     if db_URI:
         setup_db(app, db_URI)
     else:
         setup_db(app)
+
+
+        
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
@@ -54,7 +58,7 @@ def create_app(db_URI="", test_config=None):
     for all available categories.
 
     Personal Notes
-    - view is FormView.js, class is FormView(), componentDidMount()
+    - Controller is FormView.js, class is FormView(), componentDidMount()
     - curl test: curl http://127.0.0.1:5000/categories -X GET -H "Content-Type: application/json"
     """
     @app.route("/categories")
@@ -89,7 +93,7 @@ def create_app(db_URI="", test_config=None):
     Clicking on the page numbers should update the questions.
 
     Personal Notes
-    - view is QuestionView.js, method getQuestions()
+    - Controller is QuestionView.js, method getQuestions()
     - curl test: curl http://127.0.0.1:5000/questions -X GET -H "Content-Type: application/json"
     - same output since pagination is implemented: http://127.0.0.1:5000/questions?page=1
     """
@@ -121,7 +125,39 @@ def create_app(db_URI="", test_config=None):
 
     TEST: When you click the trash icon next to a question, the question will be removed.
     This removal will persist in the database and when you refresh the page.
+
+    Personal Notes
+    - Controller is QuestionView.js, method questionAction()
+    - curl test: curl http://127.0.0.1:5000/questions/2 -X DELETE
     """
+
+    @app.route("/questions/<int:question_id>", methods=["DELETE"])
+    def delete_question(question_id):
+        try:
+            selected_question = Question.query.filter(Question.id == question_id).one_or_none()
+            
+            if selected_question is None:
+                #no question with given ID
+                abort(404)
+            else:
+                #delete the question then fetch the page afresh from the DB
+                selected_question.delete()
+                selection = Question.query.order_by(Question.id).all()
+                current_questions = paginate_questions(request, selection)
+
+            return jsonify(
+                {
+                    "success": True,
+                    "deleted_question": question_id,
+                    "current_questions": current_questions,
+                    "total_questions": len(selection)
+                }
+            )
+
+        except:
+            abort(422)
+
+        
 
     """
     @TODO:
@@ -179,6 +215,16 @@ def create_app(db_URI="", test_config=None):
                 "success": False,
                 "error": 404,
                 "message": "resource not found"
+            }
+        )
+    
+    @app.errorhandler(422)
+    def unprocessable_entity(error):
+        return jsonify(
+            {
+                "error": 422,
+                "message": "Unprocessable Entity",
+                "success": False
             }
         )
 
