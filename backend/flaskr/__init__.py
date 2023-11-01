@@ -18,11 +18,13 @@ def paginate_questions(request, selection):
 
     return current_questions
 
-def create_app(test_config=None):
+def create_app(db_URI="", test_config=None):
     # create and configure the app
     app = Flask(__name__)
-    setup_db(app)
-
+    if db_URI:
+        setup_db(app, db_URI)
+    else:
+        setup_db(app)
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
@@ -57,21 +59,22 @@ def create_app(test_config=None):
     """
     @app.route("/categories")
     def retrieve_categories():
+        try:
+            selection = Category.query.order_by(Category.id).all()
+            categories = {}
 
-        selection = Category.query.order_by(Category.id).all()
-        categories = {}
+            for one_category in selection:
+                categories[one_category.id] = one_category.type
 
-        for one_category in selection:
-            categories[one_category.id] = one_category.type
-
-        return jsonify(
-            {
-                "success": True,
-                "categories": categories,
-                "total_categories": len(selection)
-            }
-        )
-
+            return jsonify(
+                {
+                    "success": True,
+                    "categories": categories,
+                    "total_categories": len(selection)
+                }
+            )
+        except:
+            abort(404)
 
     """
     @TODO: == DONE
@@ -93,17 +96,23 @@ def create_app(test_config=None):
 
     @app.route("/questions")
     def retrieve_questions(category = "all"):
-        selection_questions = Question.query.order_by(Question.id).all()
-        current_questions = paginate_questions(request, selection_questions)
+        try:
+            selection_questions = Question.query.order_by(Question.id).all()
+            current_questions = paginate_questions(request, selection_questions)
 
-        return jsonify(
-            {
-                "questions": current_questions,
-                "total_questions": len(Question.query.all()),
-                "categories": retrieve_categories().json["categories"],
-                "current_category": category
-            }
-        )
+            if len(current_questions) == 0:
+                abort(404)
+
+            return jsonify(
+                {
+                    "questions": current_questions,
+                    "total_questions": len(Question.query.all()),
+                    "categories": retrieve_categories().json["categories"],
+                    "current_category": category
+                }
+            )
+        except:
+            abort(404)
 
 
     """
@@ -162,6 +171,16 @@ def create_app(test_config=None):
     Create error handlers for all expected errors
     including 404 and 422.
     """
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify(
+            {
+                "success": False,
+                "error": 404,
+                "message": "resource not found"
+            }
+        )
 
     return app
 
