@@ -138,7 +138,7 @@ def create_app(db_URI="", test_config=None):
             
             if selected_question is None:
                 #no question with given ID
-                abort(404)
+                abort(422)
             else:
                 #delete the question then fetch the page afresh from the DB
                 selected_question.delete()

@@ -46,7 +46,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data["total_categories"])
         self.assertTrue(len(data["categories"]))
 
-    # testcase 4: test retrieve_categories() == failed ***check status code
+    # testcase 4: test retrieve_categories() == failed
     def test_404_for_bad_url(self):
         response = self.client().get("/categories/100000")
         data = json.loads(response.data)
@@ -55,6 +55,29 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["error"], 404)
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "resource not found")
+
+    # testcase 5: test delete_question() == success NB: Delete a different question in each test attempt
+    def test_delete_question_by_id(self):
+        response = self.client().delete("/questions/22")
+        data = json.loads(response.data)
+        #question = Question.query.filter(Question.id == 12).one_or_none()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["success"], True), #change to False if running same test more than once
+        self.assertEqual(data["deleted_question"], 22),
+        self.assertTrue(len(data["current_questions"])),
+        self.assertTrue(data["total_questions"])
+        #self.assertEqual(question, None)
+
+    #testcase 6: test delete_question() == failed
+    def test_422_unprocessable_entity_when_deleting_question(self):
+        response = self.client().delete("/questions/2000")
+        data = json.loads(response.data)
+
+        self.assertEqual(data["error"], 422)
+        self.assertEqual(data["message"], "Unprocessable Entity")
+        self.assertEqual(data["success"], False)
+        self.assertEqual(response.status_code, 200)
 
 
 
