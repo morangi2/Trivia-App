@@ -88,8 +88,22 @@ def create_app(test_config=None):
     Personal Notes
     - view is QuestionView.js, method getQuestions()
     - curl test: curl http://127.0.0.1:5000/questions -X GET -H "Content-Type: application/json"
+    - same output since pagination is implemented: http://127.0.0.1:5000/questions?page=1
     """
 
+    @app.route("/questions")
+    def retrieve_questions(category = "all"):
+        selection_questions = Question.query.order_by(Question.id).all()
+        current_questions = paginate_questions(request, selection_questions)
+
+        return jsonify(
+            {
+                "questions": current_questions,
+                "total_questions": len(Question.query.all()),
+                "categories": retrieve_categories().json["categories"],
+                "current_category": category
+            }
+        )
 
 
     """
