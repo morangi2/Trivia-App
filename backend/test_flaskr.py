@@ -19,6 +19,9 @@ class TriviaTestCase(unittest.TestCase):
         self.client = self.app.test_client
         #setup_db(self.app, self.database_path)
 
+        #setup a new question json object to use in the testcases
+        self.new_question = {"question":"Which year did the USA get its first African American president?","answer":"2008","difficulty":1,"category":4}
+
     
     def tearDown(self):
         """Executed after reach test"""
@@ -78,6 +81,27 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["message"], "Unprocessable Entity")
         self.assertEqual(data["success"], False)
         self.assertEqual(response.status_code, 200)
+
+    #testcase 7: test add_new_question() == success
+    def test_add_new_question(self):
+        response = self.client().post("/questions", json=self.new_question)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertTrue(data["total_questions"])
+        self.assertTrue(data["created_question_id"])
+
+    #testcase 8: test add_new_question() == failed
+    def test_400_if_adding_new_question_fails(self):
+        response = self.client().post("/questions/4000", json=self.new_question) #wrong URL
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200) #processed via expected method
+        self.assertEqual(data["error"], 405)
+        self.assertEqual(data["message"], "Method Not Allowed")
+        self.assertEqual(data["success"], False)
+
 
 
 

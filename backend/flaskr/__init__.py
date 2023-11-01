@@ -174,35 +174,39 @@ def create_app(db_URI="", test_config=None):
     - curl test: curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{"question":"Is this a curl test?","answer":"yes it is","difficulty":3,"category":2}'  
     """
     @app.route("/questions", methods=["POST"])
-    def post_new_question():
+    def add_new_question():
         #retrieve the data submitted on post
         new_question_body = request.get_json()
-        question = new_question_body.get("question", None)
-        answer = new_question_body.get("answer", None)
-        difficulty = new_question_body.get("difficulty", None)
-        category = new_question_body.get("category", None)
 
-        try:
-            #add to DB
-            question = Question(question=question, answer=answer, difficulty=difficulty, category=category)
-            question.insert()
+        if new_question_body is None:
+            abort(405)
+        else:
+            question = new_question_body.get("question", None)
+            answer = new_question_body.get("answer", None)
+            difficulty = new_question_body.get("difficulty", None)
+            category = new_question_body.get("category", None)
 
-            """ 
-            # paginate fresh fetch from DB and return page with list of questions
-            # no need to paginate as form resets for a new entry
-            selection = Question.query.order_by(Question.id).all()
-            current_questions = paginate_questions(request, selection) 
-            """
+            try:
+                #add to DB
+                question = Question(question=question, answer=answer, difficulty=difficulty, category=category)
+                question.insert()
 
-            return jsonify(
-                {
-                    "success": True,
-                    "created_question_id": question.id,
-                    "total_questions": len(Question.query.all())
-                }
-            )
-        except:
-            abort(400)
+                """ 
+                # paginate fresh fetch from DB and return page with list of questions
+                # no need to paginate as form resets for a new entry
+                selection = Question.query.order_by(Question.id).all()
+                current_questions = paginate_questions(request, selection) 
+                """
+
+                return jsonify(
+                    {
+                        "success": True,
+                        "created_question_id": question.id,
+                        "total_questions": len(Question.query.all())
+                    }
+                )
+            except:
+                abort(400)
 
     """
     @TODO:
@@ -268,6 +272,16 @@ def create_app(db_URI="", test_config=None):
             {
                 "error": 400,
                 "message": "Bad Request",
+                "success": False
+            }
+        )
+    
+    @app.errorhandler(405)
+    def bad_request(error):
+        return jsonify(
+            {
+                "error": 405,
+                "message": "Method Not Allowed",
                 "success": False
             }
         )
