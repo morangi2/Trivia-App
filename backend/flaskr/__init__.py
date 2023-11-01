@@ -8,6 +8,16 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
+def paginate_questions(request, selection):
+    page = request.args.get("page", 1, type=int)
+    start = (page - 1) * QUESTIONS_PER_PAGE
+    end = start + QUESTIONS_PER_PAGE
+
+    questions = [question.format() for question in selection]
+    current_questions = questions[start:end]
+
+    return current_questions
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
@@ -16,20 +26,55 @@ def create_app(test_config=None):
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
     """
+    @app.after_request
+    def after_request(response):
+        response.headers.add(
+            "Access-Control-Allow-Headers", "Content-Type,Authorization,true"
+        )
+        response.headers.add(
+            "Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS"
+        )
+        return response
+    
+    # test connection and local setup
+    @app.route("/hello")
+    def hello():
+        return "Hello Mercy"
 
     """
-    @TODO:
+    @TODO: == DONE
     Create an endpoint to handle GET requests
     for all available categories.
+
+    Personal Notes
+    - view is FormView.js, class is FormView(), componentDidMount()
+    - curl test: curl http://127.0.0.1:5000/categories -X GET -H "Content-Type: application/json"
     """
+    @app.route("/categories")
+    def retrieve_categories():
+
+        selection = Category.query.order_by(Category.id).all()
+        categories = {}
+
+        for one_category in selection:
+            categories[one_category.id] = one_category.type
+
+        return jsonify(
+            {
+                "success": True,
+                "categories": categories,
+                "total_categories": len(selection)
+            }
+        )
 
 
     """
-    @TODO:
+    @TODO: == DONE
     Create an endpoint to handle GET requests for questions,
     including pagination (every 10 questions).
     This endpoint should return a list of questions,
@@ -39,7 +84,13 @@ def create_app(test_config=None):
     you should see questions and categories generated,
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
+
+    Personal Notes
+    - view is QuestionView.js, method getQuestions()
+    - curl test: curl http://127.0.0.1:5000/questions -X GET -H "Content-Type: application/json"
     """
+
+
 
     """
     @TODO:
