@@ -255,7 +255,30 @@ def create_app(db_URI="", test_config=None):
     TEST: In the "List" tab / main screen, clicking on one of the
     categories in the left column will cause only questions of that
     category to be shown.
+
+    Personal Notes:
+    - Controller; QuestionsView.js, method; getByCategory()
+    - curl: 
     """
+
+    @app.route("/categories/<int:category_id>/questions")
+    def questions_by_category(category_id):
+        try:
+            selection = Question.query.order_by(Question.id).filter(Question.category == category_id).all()
+            current_questions = paginate_questions(request, selection)
+
+            return jsonify(
+                {
+                    "success": True,
+                    "questions": current_questions,
+                    "current_category": category_id,
+                    "total_questions":len(selection)
+                }
+            )
+        except:
+            abort(404) #resource not found, if URL is not correct
+
+
 
     """
     @TODO:
