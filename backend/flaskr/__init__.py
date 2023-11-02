@@ -258,7 +258,8 @@ def create_app(db_URI="", test_config=None):
 
     Personal Notes:
     - Controller; QuestionsView.js, method; getByCategory()
-    - curl: 
+    - curl expected: curl http://127.0.0.1:5000/categories/6/questions -X GET -H "Content-Type:application/json"
+    - curl non-existent category: curl http://127.0.0.1:5000/categories/10/questions -X GET -H "Content-Type:application/json"
     """
 
     @app.route("/categories/<int:category_id>/questions")
@@ -281,7 +282,7 @@ def create_app(db_URI="", test_config=None):
 
 
     """
-    @TODO:
+    @TODO: == DONE -- this was the toughest end-point to implement logically
     Create a POST endpoint to get questions to play the quiz.
     This endpoint should take category and previous question parameters
     and return a random questions within the given category,
@@ -290,10 +291,67 @@ def create_app(db_URI="", test_config=None):
     TEST: In the "Play" tab, after a user selects "All" or a category,
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
+
+    Personal Notes:
+    - View; QuizView.js ... method; getNextQuestion()
     """
 
+    @app.route("/quizzes", methods=["POST"])
+    def get_quiz_questions():
+        
+        # set-the-stage) get the selected category details from the previous page
+        body = request.get_json()  
+        previous_questions = body.get("previous_questions", []) # returns a list
+        quiz_category = body.get("quiz_category", None) # returns a dict eg==> {'type': 'Science', 'id': '1'}
+
+        # 1) get the category_id selected
+        if quiz_category:
+            category_id = quiz_category.get("id")
+        else:
+            abort(404) # since game needs a category to be selected to continue
+
+        # 2) get the questions, based on the category selected
+        # PS: category_id = 0 == all categories, is not stored in the DB, hence if-else block below
+        if category_id == 0: 
+            questions = Question.query.all()
+        else:
+            questions = Question.query.filter(Question.category == category_id).all()
+
+        # 3) get the total number of questions, based on category selected
+        total_questions = len(questions)
+
+        # 4) compare total number of questions with list of prev questions
+        # 4)a) if equal, end game
+        if total_questions == len(previous_questions):
+            return jsonify(
+                {
+                    "success": True
+                }
+            )
+
+        # 4)b) if not equal, randomized game continues
+        random_question_formatted = (random.choice(questions)).format()
+
+        # while the random question is in the list of previous questions, continue randomizing
+        while random_question_formatted.get("id") in previous_questions: 
+            random_question_formatted = (random.choice(questions)).format()
+
+
+        print("STUFFFF")
+        print(previous_questions)
+
+        return jsonify(
+            {
+                "success": True,
+                "question": random_question_formatted,
+                "category": quiz_category
+            }
+        )
+
+
+
     """
-    @TODO:
+    @TODO: == DONE
     Create error handlers for all expected errors
     including 404 and 422.
     """
