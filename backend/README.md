@@ -36,7 +36,7 @@ Populate the database using the `trivia.psql` file provided. From the `backend` 
 psql trivia < trivia.psql
 ```
 
-```
+
 ### Run the Server
 
 From within the `./src` directory first ensure you are working using your created virtual environment.
@@ -55,7 +55,12 @@ If running this in the middle of your project, here are the combined instruction
 dropdb trivia
 createdb trivia
 psql trivia < trivia.psql
-flask run --reload
+```
+front-end
+```bash
+npm start
+flask run --reload (if already running)
+```
 
 ## To Do Tasks
 
