@@ -1,6 +1,4 @@
-import os
 from flask import Flask, request, abort, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
@@ -21,16 +19,13 @@ def paginate_questions(request, selection):
 def create_app(db_URI="", test_config=None):
     # create and configure the app
     app = Flask(__name__)
-    #database_path = 'postgresql://{}/{}'.format('localhost:5432', 'database_name')
     if db_URI:
         setup_db(app, db_URI)
     else:
         setup_db(app)
-
-
         
     """
-    @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
+    @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs == DONE
     """
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
@@ -54,12 +49,10 @@ def create_app(db_URI="", test_config=None):
 
     """
     @TODO: == DONE
-    Create an endpoint to handle GET requests
-    for all available categories.
+    Create an endpoint to handle GET requests for all available categories.
 
     Personal Notes
     - Controller is FormView.js, class is FormView(), componentDidMount()
-    - curl test: curl http://127.0.0.1:5000/categories -X GET -H "Content-Type: application/json"
     """
     @app.route("/categories")
     def retrieve_categories():
@@ -82,20 +75,15 @@ def create_app(db_URI="", test_config=None):
 
     """
     @TODO: == DONE
-    Create an endpoint to handle GET requests for questions,
-    including pagination (every 10 questions).
-    This endpoint should return a list of questions,
-    number of total questions, current category, categories.
+    Create an endpoint to handle GET requests for questions, including pagination (every 10 questions).
+    This endpoint should return a list of questions, number of total questions, current category, categories.
 
-    TEST: At this point, when you start the application
-    you should see questions and categories generated,
+    TEST: At this point, when you start the application you should see questions and categories generated,
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
 
     Personal Notes
     - Controller is QuestionView.js, method getQuestions()
-    - curl test: curl http://127.0.0.1:5000/questions -X GET -H "Content-Type: application/json"
-    - same output since pagination is implemented: http://127.0.0.1:5000/questions?page=1
     """
 
     @app.route("/questions")
@@ -128,7 +116,6 @@ def create_app(db_URI="", test_config=None):
 
     Personal Notes
     - Controller is QuestionView.js, method questionAction()
-    - curl test: curl http://127.0.0.1:5000/questions/2 -X DELETE
     """
 
     @app.route("/questions/<int:question_id>", methods=["DELETE"])
@@ -153,26 +140,19 @@ def create_app(db_URI="", test_config=None):
                     "total_questions": len(selection)
                 }
             )
-
         except:
             abort(422)
 
         
-
     """
     @TODO: == DONE
-    Create an endpoint to POST a new question,
-    which will require the question and answer text,
-    category, and difficulty score.
+    Create an endpoint to POST a new question, which will require the question and answer text, category, and difficulty score.
 
-    TEST: When you submit a question on the "Add" tab,
-    the form will clear and the question will appear at the end of the last page
+    TEST: When you submit a question on the "Add" tab, the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
 
     Personal Notes
     - Controller is FormView.js, method submitQuestion()
-    - curl for new question: curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{"question":"Is this a curl test?","answer":"yes it is","difficulty":3,"category":2}'  
-    - curl for search question: curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{"searchTerm":"title"}' 
     """
     @app.route("/questions", methods=["POST"])
     def add_new_question():
@@ -234,16 +214,13 @@ def create_app(db_URI="", test_config=None):
     """
     @TODO: == DONE
     Create a POST endpoint to get questions based on a search term.
-    It should return any questions for whom the search term
-    is a substring of the question.
+    It should return any questions for whom the search term is a substring of the question.
 
-    TEST: Search by any phrase. The questions list will update to include
-    only question that include that string within their question.
+    TEST: Search by any phrase. The questions list will update to include only question that include that string within their question.
     Try using the word "title" to start.
 
     Personal Notes
     - Controller is QuestionView.js, method submitSearch()
-    - curl test: 
     """
     # the TODO above has been implemented as part of the add_new_question() method
 
@@ -252,14 +229,11 @@ def create_app(db_URI="", test_config=None):
     @TODO: == DONE
     Create a GET endpoint to get questions based on category.
 
-    TEST: In the "List" tab / main screen, clicking on one of the
-    categories in the left column will cause only questions of that
+    TEST: In the "List" tab / main screen, clicking on one of the categories in the left column will cause only questions of that
     category to be shown.
 
     Personal Notes:
     - Controller; QuestionsView.js, method; getByCategory()
-    - curl expected: curl http://127.0.0.1:5000/categories/6/questions -X GET -H "Content-Type:application/json"
-    - curl non-existent category: curl http://127.0.0.1:5000/categories/10/questions -X GET -H "Content-Type:application/json"
     """
 
     @app.route("/categories/<int:category_id>/questions")
@@ -280,16 +254,13 @@ def create_app(db_URI="", test_config=None):
             abort(404) #resource not found, if URL is not correct
 
 
-
     """
     @TODO: == DONE -- this was the toughest end-point to implement logically
     Create a POST endpoint to get questions to play the quiz.
-    This endpoint should take category and previous question parameters
-    and return a random questions within the given category,
+    This endpoint should take category and previous question parameters and return a random questions within the given category,
     if provided, and that is not one of the previous questions.
 
-    TEST: In the "Play" tab, after a user selects "All" or a category,
-    one question at a time is displayed, the user is allowed to answer
+    TEST: In the "Play" tab, after a user selects "All" or a category, one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
 
     Personal Notes:
@@ -349,11 +320,9 @@ def create_app(db_URI="", test_config=None):
             )
 
 
-
     """
     @TODO: == DONE
-    Create error handlers for all expected errors
-    including 404 and 422.
+    Create error handlers for all expected errors including 404 and 422.
     """
 
     @app.errorhandler(404)
@@ -397,4 +366,3 @@ def create_app(db_URI="", test_config=None):
         )
 
     return app
-

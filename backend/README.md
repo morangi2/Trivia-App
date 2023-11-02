@@ -36,6 +36,7 @@ Populate the database using the `trivia.psql` file provided. From the `backend` 
 psql trivia < trivia.psql
 ```
 
+```
 ### Run the Server
 
 From within the `./src` directory first ensure you are working using your created virtual environment.
@@ -47,6 +48,14 @@ flask run --reload
 ```
 
 The `--reload` flag will detect file changes and restart the server automatically.
+
+#### Quick take:
+If running this in the middle of your project, here are the combined instructions:
+```bash
+dropdb trivia
+createdb trivia
+psql trivia < trivia.psql
+flask run --reload
 
 ## To Do Tasks
 
@@ -391,7 +400,7 @@ _Second round playing the quiz_
 
 Write at least one test for the success and at least one error behavior of each endpoint using the unittest library.
 
-To deploy the tests, run
+To deploy the tests, start your virtual environment, change directory to backend, then run
 
 ```bash
 dropdb trivia_test
