@@ -70,7 +70,8 @@ def create_app(db_URI="", test_config=None):
                     "total_categories": len(selection)
                 }
             )
-        except:
+        except Exception as e:
+            print(e)
             abort(404)
 
     """
@@ -153,6 +154,7 @@ def create_app(db_URI="", test_config=None):
 
     Personal Notes
     - Controller is FormView.js, method submitQuestion()
+    - Code Review Notes: consider implementing a seperate route for search; /questions/search or /search == seperation of concers == good design principles
     """
     @app.route("/questions", methods=["POST"])
     def add_new_question():
@@ -189,6 +191,9 @@ def create_app(db_URI="", test_config=None):
 
             else: 
                 # user submitted a new question
+                # - Code Review Notes:
+                # -- Add in a check before inserting question in the DB so that the user is unable to insert empty entries as values for question or answer. 
+                # -- In case the user tries inserting empty string values for question or answer, raise an appropriate exception.
                 try:
                     #add to DB
                     question = Question(question=question, answer=answer, difficulty=difficulty, category=category)
@@ -307,6 +312,10 @@ def create_app(db_URI="", test_config=None):
             # 4)b) if not equal, randomized game continues
             random_question_formatted = (random.choice(questions)).format()
 
+            # CODE REVIEW NOTES
+            # Check out notin_ method of the SQLAlchemy to filter out the questions which have already appeared in previous_questions list 
+            # in a much more leaner and cleaner way by keeping track of the questions in the previous_questions
+           
             # while the random question is in the list of previous questions, continue randomizing
             while random_question_formatted.get("id") in previous_questions: 
                 random_question_formatted = (random.choice(questions)).format()
