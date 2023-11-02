@@ -308,7 +308,7 @@ def create_app(db_URI="", test_config=None):
         if quiz_category:
             category_id = quiz_category.get("id")
         else:
-            abort(404) # since game needs a category to be selected to continue
+            abort(400) # since game needs a category to be selected to continue
 
         # 2) get the questions, based on the category selected
         # PS: category_id = 0 == all categories, is not stored in the DB, hence if-else block below
@@ -318,35 +318,35 @@ def create_app(db_URI="", test_config=None):
             questions = Question.query.filter(Question.category == category_id).all()
 
         # 3) get the total number of questions, based on category selected
-        total_questions = len(questions)
+        if len(questions) == 0:
+            # no questions to play
+            abort(400)
+        else:
+            total_questions = len(questions)
 
-        # 4) compare total number of questions with list of prev questions
-        # 4)a) if equal, end game
-        if total_questions == len(previous_questions):
-            return jsonify(
-                {
-                    "success": True
-                }
-            )
+            # 4) compare total number of questions with list of prev questions
+            # 4)a) if equal, end game
+            if total_questions == len(previous_questions):
+                return jsonify(
+                    {
+                        "success": True
+                    }
+                )
 
-        # 4)b) if not equal, randomized game continues
-        random_question_formatted = (random.choice(questions)).format()
-
-        # while the random question is in the list of previous questions, continue randomizing
-        while random_question_formatted.get("id") in previous_questions: 
+            # 4)b) if not equal, randomized game continues
             random_question_formatted = (random.choice(questions)).format()
 
+            # while the random question is in the list of previous questions, continue randomizing
+            while random_question_formatted.get("id") in previous_questions: 
+                random_question_formatted = (random.choice(questions)).format()
 
-        print("STUFFFF")
-        print(previous_questions)
-
-        return jsonify(
-            {
-                "success": True,
-                "question": random_question_formatted,
-                "category": quiz_category
-            }
-        )
+            return jsonify(
+                {
+                    "success": True,
+                    "question": random_question_formatted,
+                    "category": quiz_category
+                }
+            )
 
 
 
