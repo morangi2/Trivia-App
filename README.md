@@ -1,5 +1,10 @@
 # API Development and Documentation Final Project
 
+## Notes from Mercy Orangi
+I used this starter code from Udacity to build all API end-points from scratch for the Trivia App. I additionally did a thorough documentation of the API created, how to use it, and sample outputs of both routes defined and errors expected. You can view this on the [Backend README](./backend/README.md).
+
+Feel free to use this project as an open-sourced, learning station, if you are looking to up-skill on building APIs. :) All the best!
+
 ## Trivia App
 
 Udacity is invested in creating bonding experiences for its employees and students. A bunch of team members got the idea to hold trivia on a regular basis and created a webpage to manage the trivia app and play the game, but their API experience is limited and still needs to be built out.
